@@ -1,6 +1,10 @@
 package org.niroshan.localjanitoragent.Service;
 
 
+import org.niroshan.localjanitoragent.LocalJanitorAgentApplication;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringApplication;
+
 public class testSecurity {
 /*
     public static void main(String[] args) {
@@ -17,4 +21,17 @@ public class testSecurity {
 
     }
 */
+/*
+    static String brainUr = "https://milanaise-unpathological-earlene.ngrok-free.dev";
+
+
+
+    public static void main(String[] args) {
+        var ctx = SpringApplication.run(LocalJanitorAgentApplication.class, args);
+
+        BrainClient br = ctx.getBean(BrainClient.class);
+        System.out.println("brainUr: " + br.ask("Say hello"));
+    }
+
+ */
 }
