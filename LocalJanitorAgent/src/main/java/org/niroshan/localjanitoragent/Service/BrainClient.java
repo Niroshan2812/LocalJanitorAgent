@@ -20,8 +20,8 @@ public class BrainClient {
 
 
 
-    public BrainClient(@Value("${agent.brain.url}") String baseUrl){
-        this.restClient = RestClient.builder().baseUrl(baseUrl).build();
+    public BrainClient(RestClient.Builder builder,@Value("${agent.brain.url}") String baseUrl){
+        this.restClient = builder.baseUrl(baseUrl).build();
     }
 
     public String ask (String prompt){
@@ -32,15 +32,12 @@ public class BrainClient {
                 "stream", false
         );
 
-        String responce = restClient.post()
+
+        return restClient.post()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(requestBody)
                 .retrieve()
                 .body(String.class);
-
-        // todo -> parse json responce here to extract the content
-
-        return responce;
     }
 
 
