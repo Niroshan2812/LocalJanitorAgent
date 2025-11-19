@@ -1,6 +1,7 @@
 package org.niroshan.localjanitoragent.Service;
 
 
+import org.niroshan.localjanitoragent.Model.OllamaResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -32,13 +33,20 @@ public class BrainClient {
                 "stream", false
         );
 
-
-        return restClient.post()
+    // map responce directly to DTO class
+        OllamaResponse response = restClient.post()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(requestBody)
                 .retrieve()
-                .body(String.class);
+                .body(OllamaResponse.class);
+
+        if(response != null && response.message() != null){
+            return response.message().content();
+        }
+        return "Null";
     }
+
+
 
 
 }

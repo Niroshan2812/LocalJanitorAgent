@@ -1,5 +1,9 @@
 package org.niroshan.localjanitoragent.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.niroshan.localjanitoragent.Model.ToolCommand;
 import org.niroshan.localjanitoragent.Service.BrainClient;
 import org.niroshan.localjanitoragent.Tools.AgentTool;
 import org.springframework.boot.CommandLineRunner;
@@ -14,11 +18,14 @@ public class JanitorAgent implements CommandLineRunner {
 
     private final BrainClient brainClient;
     private final Map<String, AgentTool> tools;
+    private final ObjectMapper objectMapper;
 
-    public JanitorAgent(BrainClient brainClient, List<AgentTool> toolList) {
+
+
+    public JanitorAgent(BrainClient brainClient, List<AgentTool> toolList, ObjectMapper objectMapper) {
         this.brainClient = brainClient;
         this.tools = toolList.stream().collect(Collectors.toMap(AgentTool::getName, t -> t));
-
+        this.objectMapper = objectMapper;
     }
 
 
@@ -47,7 +54,37 @@ public class JanitorAgent implements CommandLineRunner {
         // ask
         System.out.println("Asking");
        String responce =  brainClient.ask(prompt);
-       System.out.println(responce);
+       System.out.println("Brain row output: "+ responce);
+
+       // Execution Logic
+
+        try{
+            // clean up responce
+            String cleanJson = responce.replace("```json", "").replace("```","").trim();
+
+            // ConverJson into Java Object
+
+            ToolCommand command =  objectMapper.readValue(cleanJson, ToolCommand.class);
+
+            // find the tool
+            AgentTool toolToRun = tools.get(command.tool());
+
+            if(toolToRun != null){
+                System.out.println("Executing tool: "+ command.tool());
+
+                // run the tool
+                String result = toolToRun.execute(command.args());
+                System.out.println("Result: "+result);
+            }else{
+                System.out.println("No tool to be executed: "+ command.tool());
+            }
+
+
+
+        } catch (Exception e) {
+            System.out.println("Error: "+ e.getMessage());
+            throw new RuntimeException(e);
+        }
 
 
     }
