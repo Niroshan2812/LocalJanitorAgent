@@ -54,6 +54,14 @@ public class JanitorAgent implements CommandLineRunner {
         // ask
         System.out.println("Asking");
        String responce =  brainClient.ask(prompt);
+
+       if (responce == null || responce.trim().isEmpty()) {
+           System.out.println("Model return a empty response. llike a loading model ");
+           System.out.println("Rerun the project ");
+           return;
+
+       }
+
        System.out.println("Brain row output: "+ responce);
 
        // Execution Logic

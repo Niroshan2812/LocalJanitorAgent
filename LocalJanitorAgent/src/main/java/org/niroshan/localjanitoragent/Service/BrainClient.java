@@ -4,9 +4,12 @@ package org.niroshan.localjanitoragent.Service;
 import org.niroshan.localjanitoragent.Model.OllamaResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +25,21 @@ public class BrainClient {
 
 
     public BrainClient(RestClient.Builder builder,@Value("${agent.brain.url}") String baseUrl){
-        this.restClient = builder.baseUrl(baseUrl).build();
+
+        // -- Error - GoAway ----fix 7.23 pm
+        // config inner Http CLient
+        var httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(Duration.ofSeconds(20))
+                .build();
+        // Create factory with a long read Timeout
+        var requestFactory = new JdkClientHttpRequestFactory(httpClient);
+        // wait 5 min for AI
+        requestFactory.setReadTimeout(Duration.ofMinutes(5));
+
+        this.restClient = builder.baseUrl(baseUrl)
+                .requestFactory(requestFactory)
+                .build();
     }
 
     public String ask (String prompt){
