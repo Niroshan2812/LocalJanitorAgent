@@ -1,7 +1,6 @@
 package org.niroshan.localjanitoragent.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.logging.log4j.message.Message;
 
 /*
 Json parser for the project ---

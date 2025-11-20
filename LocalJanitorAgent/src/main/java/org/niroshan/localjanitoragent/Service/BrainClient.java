@@ -46,21 +46,27 @@ public class BrainClient {
         // prep Json body manually or use a DTO
         var requestBody = Map.of(
                 "model",  modelName,
-                "message", List.of(Map.of("role", "user", "content",prompt)),
+                "messages", List.of(Map.of("role", "user", "content",prompt)),
                 "stream", false
         );
+        try{
+            OllamaResponse response = restClient.post()
+                    .uri("/api/chat")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("ngrok-skip-browser-warning", "true")
+                    .body(requestBody)
+                    .retrieve()
+                    .body(OllamaResponse.class);
 
-    // map responce directly to DTO class
-        OllamaResponse response = restClient.post()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(requestBody)
-                .retrieve()
-                .body(OllamaResponse.class);
+            if (response != null && response.message() != null) {
 
-        if(response != null && response.message() != null){
-            return response.message().content();
+                return response.message().content();
+
+            }
+        }catch(Exception e){
+            System.out.println("Connection error: "+ e.getMessage());
         }
-        return "Null";
+        return null;
     }
 
 
