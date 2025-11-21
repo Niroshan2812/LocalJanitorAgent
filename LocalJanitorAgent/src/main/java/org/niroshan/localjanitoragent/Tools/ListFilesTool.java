@@ -38,8 +38,8 @@ public class ListFilesTool  implements AgentTool{
         StringBuilder sb = new StringBuilder();
         for (File file : files) {
             if (file.isFile()){
-             long sizeInMb = file.length()/(1024*1024);
-             sb.append(file.getName()).append("(").append(sizeInMb).append("MB)");
+             double sizeInMb = (double)file.length()/(1024*1024);
+             sb.append(String.format("%s(%.2fMB) ", file.getName(), sizeInMb));
             }
         }
         return sb.toString();

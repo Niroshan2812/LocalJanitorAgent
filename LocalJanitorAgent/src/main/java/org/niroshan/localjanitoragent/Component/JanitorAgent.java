@@ -52,6 +52,7 @@ public class JanitorAgent implements CommandLineRunner {
     """.formatted(toolDescription, new ListFilesTool(new SafetyService()).execute(""));
 
         // ask
+        System.out.println("Loaded Tools: " + tools.keySet());
         System.out.println("Asking");
        String responce =  brainClient.ask(prompt);
 

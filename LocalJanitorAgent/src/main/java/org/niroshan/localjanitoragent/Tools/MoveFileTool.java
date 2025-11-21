@@ -1,12 +1,14 @@
 package org.niroshan.localjanitoragent.Tools;
 
 import org.niroshan.localjanitoragent.Service.SafetyService;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+@Component
 public class MoveFileTool implements AgentTool{
 
     private final SafetyService safetyService;
@@ -46,7 +48,7 @@ public class MoveFileTool implements AgentTool{
         }
 
         // validate
-      if(safetyService.isSafe(destFolderName)){
+      if(!safetyService.isSafe(destFolderName)){
           return "Error: Access denied to Destination ";
       }
         Path destPath = safetyService.getRoot().resolve(destFolderName);

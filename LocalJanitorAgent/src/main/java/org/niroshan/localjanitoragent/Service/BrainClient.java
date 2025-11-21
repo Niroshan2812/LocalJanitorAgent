@@ -37,8 +37,11 @@ public class BrainClient {
         // wait 5 min for AI
         requestFactory.setReadTimeout(Duration.ofMinutes(5));
 
-        this.restClient = builder.baseUrl(baseUrl)
+        this.restClient = builder
+                .baseUrl(baseUrl)
                 .requestFactory(requestFactory)
+                .defaultHeader("ngrok-skip-browser-warning", "true")
+                .defaultHeader("User-Agent", "Janitor-Agent-v1")
                 .build();
     }
 
