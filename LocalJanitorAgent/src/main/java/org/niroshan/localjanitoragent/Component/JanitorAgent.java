@@ -1,11 +1,11 @@
 package org.niroshan.localjanitoragent.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.niroshan.localjanitoragent.Model.ToolCommand;
 import org.niroshan.localjanitoragent.Service.BrainClient;
+import org.niroshan.localjanitoragent.Service.SafetyService;
 import org.niroshan.localjanitoragent.Tools.AgentTool;
+import org.niroshan.localjanitoragent.Tools.ListFilesTool;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -40,16 +40,16 @@ public class JanitorAgent implements CommandLineRunner {
                 .collect(Collectors.joining("\n"));
 
         String prompt = """
-                You are file manager assistent
-                you have access to there tools:
-                %s
-                
-                My current files are: [Files will be listed here in real app]
-                Goal: Clean up my folder.
-                Respond Only in this JSON format:
-                
-                {"tool": "tool_name", "args": "arguments"}
-                """.formatted(toolDescription);
+                You are a Janitor Agent.
+    Tools:
+    %s
+    
+    Files currently in directory: %s  <-- We inject the file list HERE now!
+    
+    Goal: Move any image larger than 5MB to a folder named 'Large_Images'.
+    
+    Respond ONLY in JSON: { "tool": "...", "args": "..." }
+    """.formatted(toolDescription, new ListFilesTool(new SafetyService()).execute(""));
 
         // ask
         System.out.println("Asking");

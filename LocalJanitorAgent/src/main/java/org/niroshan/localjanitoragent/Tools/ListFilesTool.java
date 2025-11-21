@@ -4,8 +4,6 @@ import org.niroshan.localjanitoragent.Service.SafetyService;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 @Component
 public class ListFilesTool  implements AgentTool{
@@ -29,16 +27,21 @@ public class ListFilesTool  implements AgentTool{
     @Override
     public String execute(String argument) {
         File folder = safetyService.getRoot().toFile();
-        System.out.println("folder: " + folder.getAbsolutePath());
-        if(!folder.exists()){
+        //System.out.println("folder: " + folder.getAbsolutePath());
+        if (!folder.exists()) {
             return "Directory not found";
         }
         File[] files = folder.listFiles();
-        if(files==null){
+        if (files == null) {
             return "Directory is empty";
         }
-        return Arrays.stream(files)
-                .map(f -> f.getName() + (f.isDirectory()? "/": ""))
-                .collect((Collectors.joining(",")));
+        StringBuilder sb = new StringBuilder();
+        for (File file : files) {
+            if (file.isFile()){
+             long sizeInMb = file.length()/(1024*1024);
+             sb.append(file.getName()).append("(").append(sizeInMb).append("MB)");
+            }
+        }
+        return sb.toString();
     }
 }
