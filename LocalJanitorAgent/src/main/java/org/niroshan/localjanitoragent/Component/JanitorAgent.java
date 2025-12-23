@@ -6,8 +6,8 @@ import org.niroshan.localjanitoragent.Model.ToolCommand;
 import org.niroshan.localjanitoragent.Service.BrainClient;
 import org.niroshan.localjanitoragent.Service.PromptService;
 import org.niroshan.localjanitoragent.Service.SafetyService;
+import org.niroshan.localjanitoragent.Service.UserInterfaceService;
 import org.niroshan.localjanitoragent.Tools.AgentTool;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,67 +15,58 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class JanitorAgent implements CommandLineRunner {
+public class JanitorAgent {
 
     private final BrainClient brainClient;
     private final Map<String, AgentTool> tools;
     private final ObjectMapper objectMapper;
     private final PromptService promptService;
     private final SafetyService safetyService;
+    private final UserInterfaceService uiService;
 
     public JanitorAgent(BrainClient brainClient, List<AgentTool> toolList, ObjectMapper objectMapper,
-            PromptService promptService, SafetyService safetyService) {
+            PromptService promptService, SafetyService safetyService, UserInterfaceService uiService) {
         this.brainClient = brainClient;
         this.tools = toolList.stream().collect(Collectors.toMap(AgentTool::getName, t -> t));
         this.objectMapper = objectMapper;
         this.promptService = promptService;
         this.safetyService = safetyService;
+        this.uiService = uiService;
     }
 
-    @Override
-    public void run(String... args) {
+    public void execute(String userPath, String goal) {
 
-        System.out.println("Starting Janitor Agent ...");
+        uiService.print("Starting Janitor Agent ...");
 
-        // Ask for working directory
-        System.out.print("Enter target directory path (Press Enter for default): ");
-        java.util.Scanner scanner = new java.util.Scanner(System.in);
-        String userPath = scanner.nextLine().trim();
-
-        if (!userPath.isEmpty()) {
+        if (userPath != null && !userPath.isEmpty()) {
             try {
                 safetyService.setRootPath(userPath);
             } catch (IllegalArgumentException e) {
-                System.err.println("Error: " + e.getMessage());
-                System.out.println("Falling back to default sandbox.");
+                uiService.print("Error: " + e.getMessage());
+                uiService.print("Falling back to default sandbox.");
             }
         }
 
-        String goal = (args.length > 0) ? args[0] : "Move ALL files ending in .png to a folder named 'Images'.";
-        System.out.println("Goal: " + goal);
+        uiService.print("Goal: " + goal);
 
         // Construct System prompt
         String toolDescription = tools.values().stream()
-                .map(t -> "_ " + t.getName() + ": " + t.getDescription())
+                .map(t -> "- " + t.getName() + ": " + t.getDescription())
                 .collect(Collectors.joining("\n"));
         String currentFiles = tools.get("list_files").execute("");
 
         if (currentFiles.equals("Directory not found")) {
-            System.out.println("No files found.");
+            uiService.print("No files found.");
             return;
         }
         // Get prompt
         String prompt = promptService.buildSystemPrompt(toolDescription, currentFiles, goal);
-        // ask
-        // System.out.println("Loaded Tools: " + tools.keySet());
 
-        // -----------------------------------------------------------------------------------------------------------------
-
-        System.out.println("Asking");
+        uiService.print("Asking AI...");
         String responce = brainClient.ask(prompt);
 
         if (responce == null || responce.trim().isEmpty()) {
-            System.out.println("Model return a empty response.");
+            uiService.print("Model return a empty response.");
             return;
         }
 
@@ -86,28 +77,35 @@ public class JanitorAgent implements CommandLineRunner {
 
             // Check if model return an empty list or nothing
             if (cleanJson.equals("[]")) {
-                System.out.println("Model return a no work needed. ");
+                uiService.print("Model return a no work needed. ");
                 return;
             }
             // Prepare as a List
             List<ToolCommand> commands = objectMapper.readValue(cleanJson, new TypeReference<List<ToolCommand>>() {
             });
-            System.out.println("Commands: " + commands);
-            System.out.println("Received " + commands.size() + "Commands");
+            uiService.print("Received " + commands.size() + " Commands");
             // Execute all command in one quick loop
             for (ToolCommand cmd : commands) {
-                AgentTool toolToRun = tools.get(cmd.tool());
+                String toolName = cmd.tool();
+                AgentTool toolToRun = tools.get(toolName);
+
+                // Fallback: Strip leading underscore if present (Model Hallucination Fix)
+                if (toolToRun == null && toolName.startsWith("_")) {
+                    toolName = toolName.substring(1);
+                    toolToRun = tools.get(toolName);
+                }
+
                 if (toolToRun != null) {
-                    System.out.println(">> Executing " + cmd.tool() + " args " + cmd.args());
+                    uiService.print(">> Executing " + toolName + " args " + cmd.args());
                     String result = toolToRun.execute(cmd.args());
-                    System.out.println("<< " + cmd.tool() + " result " + result);
+                    uiService.print("<< " + toolName + " result " + result);
                 } else {
-                    System.out.println("Unknown Tool " + cmd.tool());
+                    uiService.print("Unknown Tool " + cmd.tool());
                 }
             }
         } catch (Exception e) {
-            System.out.println("JSON Error (Did the model return array ? ) " + e.getMessage());
-            System.out.println("Row response: " + responce);
+            uiService.print("JSON Error (Did the model return array ? ) " + e.getMessage());
+            uiService.print("Raw response: " + responce);
         }
     }
 }

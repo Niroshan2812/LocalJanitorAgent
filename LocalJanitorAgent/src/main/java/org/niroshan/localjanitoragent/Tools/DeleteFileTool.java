@@ -1,21 +1,23 @@
 package org.niroshan.localjanitoragent.Tools;
 
 import org.niroshan.localjanitoragent.Service.SafetyService;
+import org.niroshan.localjanitoragent.Service.UserInterfaceService;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Scanner;
 
 @Component
 public class DeleteFileTool implements AgentTool {
 
     private final SafetyService safetyService;
+    private final UserInterfaceService uiService;
 
-    public DeleteFileTool(SafetyService safetyService) {
+    public DeleteFileTool(SafetyService safetyService, UserInterfaceService uiService) {
         this.safetyService = safetyService;
+        this.uiService = uiService;
     }
 
     @Override
@@ -40,16 +42,11 @@ public class DeleteFileTool implements AgentTool {
             return "Error: File not found: " + filename;
         }
 
-        System.out.println("---------------------------------------------------------");
-        System.out.println("ALERT: Request to DELETE file: " + file.getAbsolutePath());
-        System.out.println("Do you want to:");
-        System.out.println("  [y] DELETE permanently");
-        System.out.println("  [n] Skip / Keep");
-        System.out.println("  [m] MOVE to another folder");
-        System.out.print("Choice [y/n/m]: ");
+        uiService.print("---------------------------------------------------------");
+        uiService.print("ALERT: Request to DELETE file: " + file.getAbsolutePath());
 
-        Scanner scanner = new Scanner(System.in);
-        String choice = scanner.nextLine().trim().toLowerCase();
+        String choice = uiService.ask("Do you want to: [y] DELETE permanently, [n] Skip, [m] MOVE? Choice [y/n/m]:")
+                .toLowerCase();
 
         switch (choice) {
             case "y":
@@ -62,8 +59,7 @@ public class DeleteFileTool implements AgentTool {
             case "n":
                 return "Skipped deletion of " + filename;
             case "m":
-                System.out.print("Enter destination folder name (relative to root): ");
-                String destFolder = scanner.nextLine().trim();
+                String destFolder = uiService.ask("Enter destination folder name (relative to root):").trim();
 
                 if (!safetyService.isSafe(destFolder)) {
                     return "Error: Unsafe destination " + destFolder;

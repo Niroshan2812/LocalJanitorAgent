@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 
 @Component
-public class ListFilesTool  implements AgentTool{
+public class ListFilesTool implements AgentTool {
 
     private final SafetyService safetyService;
 
@@ -27,7 +27,7 @@ public class ListFilesTool  implements AgentTool{
     @Override
     public String execute(String argument) {
         File folder = safetyService.getRoot().toFile();
-        //System.out.println("folder: " + folder.getAbsolutePath());
+        // System.out.println("folder: " + folder.getAbsolutePath());
         if (!folder.exists()) {
             return "Directory not found";
         }
@@ -37,9 +37,11 @@ public class ListFilesTool  implements AgentTool{
         }
         StringBuilder sb = new StringBuilder();
         for (File file : files) {
-            if (file.isFile()){
-             double sizeInMb = (double)file.length()/(1024*1024);
-             sb.append(String.format("%s(%.2fMB) ", file.getName(), sizeInMb));
+            if (file.isDirectory()) {
+                sb.append("[DIR] ").append(file.getName()).append("\n");
+            } else {
+                double sizeInMb = (double) file.length() / (1024 * 1024);
+                sb.append(String.format("%s (%.2fMB)\n", file.getName(), sizeInMb));
             }
         }
         return sb.toString();
