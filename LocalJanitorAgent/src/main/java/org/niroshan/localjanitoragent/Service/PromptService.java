@@ -21,13 +21,14 @@ public class PromptService {
          CRITICAL INSTRUCTION:
          - You must respond with a JSON ARRAY of commands.
          - Do not move the same file twice.
-         - If no files need moving, return an empty array [].
+         - If no files need moving, or the goal is already met, use 'report_reason' to explain why. Do NOT return an empty array.
 
          Example Response:
          [
            { "tool": "move_file", "args": "a.png|Images" },
            { "tool": "move_file", "args": "b.png|Images" }
          ]
-         """.formatted(toolDescription, fileList, goal);
+         """
+        .formatted(toolDescription, fileList, goal);
   }
 }
