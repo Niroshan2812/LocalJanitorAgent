@@ -1,30 +1,48 @@
 package org.niroshan.localjanitoragent.Service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Service
 public class SafetyService {
-    // provide the test folder Test done
-   private final Path ROOT_DIR = Paths.get(System.getProperty("user.home"), "Downloads", "Janitor_Sandbox");
+    private Path rootDir;
 
+    public SafetyService(@Value("${agent.fs.root-dir}") String configRootDir) {
+        setRootPath(configRootDir);
+    }
 
-    public boolean isSafe(String pathString){
-        try{
-            Path reqPath = ROOT_DIR.resolve(pathString).normalize();
-            System.out.println(reqPath);
+    public void setRootPath(String path) {
+        this.rootDir = Paths.get(path);
+        File folder = this.rootDir.toFile();
+        if (!folder.exists()) {
+            boolean created = folder.mkdirs();
+            if (created) {
+                System.out.println("Created directory: " + folder.getAbsolutePath());
+            } else {
+                System.err.println("Failed to create directory: " + folder.getAbsolutePath());
+            }
+        } else {
+            System.out.println("Using directory: " + folder.getAbsolutePath());
+        }
+    }
+
+    public boolean isSafe(String pathString) {
+        try {
+            Path reqPath = rootDir.resolve(pathString).normalize();
             // check is the requested path is start with the Root_Dir
-            return reqPath.startsWith(ROOT_DIR);
-        }catch(Exception e){
-            System.out.println("This come from root pat : "+ e.getMessage());
+            return reqPath.startsWith(rootDir);
+        } catch (Exception e) {
+            System.out.println("Security Check Error: " + e.getMessage());
             return false;
         }
     }
 
-    public Path getRoot(){
-        return ROOT_DIR;
+    public Path getRoot() {
+        return rootDir;
     }
 
 }
