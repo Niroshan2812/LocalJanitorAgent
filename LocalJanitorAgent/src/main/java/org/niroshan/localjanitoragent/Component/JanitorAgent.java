@@ -43,13 +43,13 @@ public class JanitorAgent implements CommandLineRunner {
         String userPath = scanner.nextLine().trim();
 
         if (!userPath.isEmpty()) {
-            safetyService.setRootPath(userPath);
+            try {
+                safetyService.setRootPath(userPath);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Error: " + e.getMessage());
+                System.out.println("Falling back to default sandbox.");
+            }
         }
-
-        // Wait, I missed that SafetyService is NOT injected into JanitorAgent.
-        // It's in the constructor but not stored as a field? Checking constructor...
-        // Constructor has PromptService, BrainClient, Tools.
-        // I need to add SafetyService to JanitorAgent first.
 
         String goal = (args.length > 0) ? args[0] : "Move ALL files ending in .png to a folder named 'Images'.";
         System.out.println("Goal: " + goal);
