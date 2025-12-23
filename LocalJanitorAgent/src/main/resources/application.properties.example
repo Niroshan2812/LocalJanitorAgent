@@ -3,7 +3,6 @@ agent.files.extensions=.png
 # agent.fs.root-dir=${user.home}/Janitor_Sandbox
 
 # Gemini AI Configuration
-agent.gemini.key=AIzaSyBEbmwyVa27aq-yt7L7bITdPyUI1oHW1rM
+# REPLACE WITH YOUR KEY
+agent.gemini.key=YOUR_GEMINI_API_KEY_HERE
 agent.model=gemini-1.5-flash
-
-agent.fs.root-dir=${user.home}/Janitor_Sandbox
