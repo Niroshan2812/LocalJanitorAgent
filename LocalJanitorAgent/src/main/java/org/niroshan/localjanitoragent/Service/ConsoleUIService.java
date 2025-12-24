@@ -29,4 +29,14 @@ public class ConsoleUIService implements UserInterfaceService {
         System.out.print("Enter choice: ");
         return scanner.nextLine().trim();
     }
+
+    @Override
+    public void updateStatus(String status) {
+        System.out.println("[STATUS] " + status);
+    }
+
+    @Override
+    public void notifyFileChange(String path) {
+        System.out.println("[FILE CHANGED] " + path);
+    }
 }

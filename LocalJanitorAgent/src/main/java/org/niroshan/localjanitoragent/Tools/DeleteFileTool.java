@@ -52,7 +52,12 @@ public class DeleteFileTool implements AgentTool {
             case "y":
                 try {
                     boolean deleted = file.delete();
-                    return deleted ? "Deleted " + filename : "Failed to delete " + filename;
+                    if (deleted) {
+                        uiService.notifyFileChange(file.getParent());
+                        return "Deleted " + filename;
+                    } else {
+                        return "Failed to delete " + filename;
+                    }
                 } catch (Exception e) {
                     return "Error deleting: " + e.getMessage();
                 }

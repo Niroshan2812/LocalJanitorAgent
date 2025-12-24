@@ -68,4 +68,30 @@ public class GuiUIService implements UserInterfaceService {
             return "";
         }
     }
+
+    // Callbacks for Status and File Updates
+    private java.util.function.Consumer<String> statusCallback;
+    private java.util.function.Consumer<String> fileChangeCallback;
+
+    public void setStatusCallback(java.util.function.Consumer<String> callback) {
+        this.statusCallback = callback;
+    }
+
+    public void setFileChangeCallback(java.util.function.Consumer<String> callback) {
+        this.fileChangeCallback = callback;
+    }
+
+    @Override
+    public void updateStatus(String status) {
+        if (statusCallback != null) {
+            Platform.runLater(() -> statusCallback.accept(status));
+        }
+    }
+
+    @Override
+    public void notifyFileChange(String path) {
+        if (fileChangeCallback != null) {
+            Platform.runLater(() -> fileChangeCallback.accept(path));
+        }
+    }
 }

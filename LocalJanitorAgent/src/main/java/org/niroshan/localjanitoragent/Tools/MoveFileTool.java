@@ -12,9 +12,12 @@ import java.nio.file.StandardCopyOption;
 public class MoveFileTool implements AgentTool {
 
     private final SafetyService safetyService;
+    private final org.niroshan.localjanitoragent.Service.UserInterfaceService uiService;
 
-    public MoveFileTool(SafetyService safetyService) {
+    public MoveFileTool(SafetyService safetyService,
+            org.niroshan.localjanitoragent.Service.UserInterfaceService uiService) {
         this.safetyService = safetyService;
+        this.uiService = uiService;
     }
 
     @Override
@@ -89,6 +92,8 @@ public class MoveFileTool implements AgentTool {
         // move
         try {
             Files.move(sourceFile.toPath(), destPath.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+            safetyService.getRoot().resolve(destFolderName).toString(); // ensure valid path usage or just notify root
+            uiService.notifyFileChange(safetyService.getRoot().toString()); // safe to notify root or parent
             return "Successfully moved" + filename + " file to " + destFolderName;
         } catch (Exception e) {
             return "Error: " + e.getMessage();

@@ -8,4 +8,8 @@ public interface UserInterfaceService {
     String ask(String question);
 
     String askChoice(String question, List<String> options);
+
+    void updateStatus(String status);
+
+    void notifyFileChange(String path);
 }

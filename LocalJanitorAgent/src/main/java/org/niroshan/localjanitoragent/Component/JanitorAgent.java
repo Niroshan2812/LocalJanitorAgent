@@ -34,6 +34,10 @@ public class JanitorAgent {
         this.uiService = uiService;
     }
 
+    public void configure(String provider, String key, String url, String modelName) {
+        brainClient.configure(provider, key, url, modelName);
+    }
+
     public void execute(String userPath, String goal) {
 
         uiService.print("Starting Janitor Agent ...");
@@ -63,6 +67,7 @@ public class JanitorAgent {
         String prompt = promptService.buildSystemPrompt(toolDescription, currentFiles, goal);
 
         uiService.print("Asking AI...");
+        uiService.updateStatus("Thinking \uD83E\uDDE0");
         String responce = brainClient.ask(prompt);
 
         if (responce == null || responce.trim().isEmpty()) {
@@ -84,6 +89,7 @@ public class JanitorAgent {
             List<ToolCommand> commands = objectMapper.readValue(cleanJson, new TypeReference<List<ToolCommand>>() {
             });
             uiService.print("Received " + commands.size() + " Commands");
+            uiService.updateStatus("Acting \u2699\uFE0F");
             // Execute all command in one quick loop
             for (ToolCommand cmd : commands) {
                 String toolName = cmd.tool();
@@ -103,6 +109,7 @@ public class JanitorAgent {
                     uiService.print("Unknown Tool " + cmd.tool());
                 }
             }
+            uiService.updateStatus("Done \u2705");
         } catch (Exception e) {
             uiService.print("JSON Error (Did the model return array ? ) " + e.getMessage());
             uiService.print("Raw response: " + responce);
