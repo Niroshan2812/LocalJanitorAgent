@@ -230,7 +230,7 @@ public class MainWindowController {
             if ("Ollama".equals(selected)) {
                 apiKeyField.setDisable(true);
                 urlField.setDisable(false);
-                modelNameField.setText("llama3");
+                modelNameField.setText("Qwen2.5-Coder-0.5B-Instruct");
             } else if ("GPT".equals(selected)) {
                 apiKeyField.setDisable(false);
                 urlField.setDisable(true);
